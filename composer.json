@@ -4,7 +4,7 @@
     "require": {
         "typo3/neos": "*"
     },
-    "name": "neos/aclinspector",
+    "name": "johannessteu/neos-aclinspector",
     "autoload": {
         "psr-0": {
             "Neos\\ACLInspector": "Classes/"
