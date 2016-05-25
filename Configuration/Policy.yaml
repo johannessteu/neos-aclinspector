@@ -1,0 +1,15 @@
+#                                                                        #
+# Security policy for the Neos package                                   #
+#                                                                        #
+
+privilegeTargets:
+  'TYPO3\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'TYPO3.Neos:Backend.Module.ACLInspector':
+      matcher: 'method(Neos\ACLInspector\Controller\Module\ACLInspectorController->indexAction())'
+
+roles:
+  'TYPO3.Neos:Administrator':
+    privileges:
+      -
+        privilegeTarget: 'TYPO3.Neos:Backend.Module.ACLInspector'
+        permission: GRANT

@@ -1,0 +1,15 @@
+TYPO3:
+  Neos:
+    modules:
+      administration:
+        submodules:
+          aclinspector:
+            label: 'ACL Inspector'
+            controller: '\Neos\ACLInspector\Controller\Module\ACLInspectorController'
+            description: 'Module to check the acl'
+            icon: 'icon-lock'
+            actions:
+              index:
+                label: 'ACL Inspector'
+                title: 'ACL Inspector'
+            privilegeTarget: 'TYPO3.Neos:Backend.Module.ACLInspector'
