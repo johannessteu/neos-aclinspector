@@ -66,7 +66,10 @@ class ACLCheckerService
     public function checkNodeForRoles(NodeInterface $node, array $roles)
     {
         $checkedNodes = [
-            'node' => $node,
+            'node' => [
+                'nodeData' => $node,
+                'title' => $node->getProperty('title')
+            ],
             'acl' => []
         ];
 
