@@ -2,6 +2,9 @@
     .icon-green { color: green; }
     .icon-red { color: red; }
     .icon-nodeCheck { margin: 0 10px !important; }
+    .acl-dropdown {border: none; padding: 0 14px !important; border-top: 2px solid #595959; background-color: #3f3f3f;}
+    .acl-dropdown span { display: block; height: 40px; line-height: 36px; }
+    .acl-dropdown span span{ display: inline; color: #9C9C9C; }
 </style>
 
 <div class="neos-content neos-container-fluid">
@@ -12,15 +15,17 @@
                 <div class="neos-control-group">
                     <label class="neos-control-label" for="startPath">Start on path:</label>
                     <div class="neos-controls neos-controls-row">
-                        <f:form.textfield property="startOnNodePath" id="startPath" style="width: 100%;"
+                        <f:form.textfield property="startOnNodePath" class="acl-autocompletition" id="startPath" style="width: 100%;"
                                           placeholder="/sites/"/>
+                        <div class="acl-dropdown" style="display: none"><span><i class="icon-white icon-spin icon-spinner"></i> Loading</span></div>
                     </div>
                 </div>
                 <div class="neos-control-group">
                     <label class="neos-control-label" for="endPath">End on path:</label>
                     <div class="neos-controls neos-controls-row">
-                        <f:form.textfield property="stopOnNodePath" id="endPath" style="width: 100%;"
+                        <f:form.textfield property="stopOnNodePath" class="acl-autocompletition" id="endPath" style="width: 100%;"
                                           placeholder="/sites/site/"/>
+                        <div class="acl-dropdown" style="display: none">adsfsdf</div>
                     </div>
                 </div>
                 <button class="neos-button neos-button-success neos-pull-right">Check ACL</button>
@@ -94,3 +99,45 @@
         </f:else>
     </f:if>
 </f:section>
+
+
+<script>
+    $(document).ready(function () {
+        $('.acl-autocompletition').on('keyup', function () {
+            if($(this).val() != "" && $(this).val().charAt(0) != "/" && $(this).val().length > 1) {
+                aclFetchNodesForAutocompletion($(this), $(this).val());
+            } else {
+                $(this).parent().find('.acl-dropdown').hide();
+            }
+        });
+    });
+
+    function aclFetchNodesForAutocompletion(input, query) {
+        var searchEndpoint = '/neos/service/node/search-page';
+
+        var dropdown = input.parent().find('.acl-dropdown');
+        dropdown.html('<span><i class="icon-white icon-spin icon-spinner"></i> Loading</span>');
+        dropdown.show();
+
+        $.get(
+            searchEndpoint,
+            {query: query},
+            function(data) {
+                dropdown.html('');
+                $.each(data.searchResult, function () {
+                    dropdown.append('<span class="result" data-nodepath="' + this.id + '">' + this.name + ' <span class="acl-info">( ' + this.id + ' )</span></span>');
+                });
+
+                $.each(dropdown.find('span.result'), function (input) {
+                    $(this).click(function () {
+                        input = $(this).parent().parent().find('input');
+                        $(input).val($(this).data('nodepath'));
+                        dropdown.hide();
+                    });
+                })
+            },
+            'json'
+        )
+    }
+
+</script>
