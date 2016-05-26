@@ -99,7 +99,11 @@ class ACLCheckerService
         $context = $this->contextFactory->create(array('workspaceName' => 'live'));
 
         if($dto->getStopOnNodePath() !== '') {
-            $nodes = $context->getNodesOnPath($dto->getStartOnNodePath(), $dto->getStopOnNodePath());
+            try {
+                $nodes = $context->getNodesOnPath($dto->getStartOnNodePath(), $dto->getStopOnNodePath());
+            } catch (\InvalidArgumentException $e) {
+                $nodes = [];
+            }
         } else {
             $nodes = [$context->getNode($dto->getStartOnNodePath())];
         }

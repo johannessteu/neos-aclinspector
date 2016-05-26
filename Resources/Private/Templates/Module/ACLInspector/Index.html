@@ -84,6 +84,10 @@
 
             </tr>
         </f:for>
+
+        <f:if condition="{nodes -> f:count()} == 0">
+            <tr><td colspan="4">No nodes found</td>
+        </f:if>
         </tbody>
     </table>
 
