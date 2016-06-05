@@ -10,8 +10,10 @@ use TYPO3\Flow\Security\Authorization\PrivilegeManagerInterface;
 use TYPO3\Flow\Security\Exception\NoSuchRoleException;
 use TYPO3\Flow\Security\Policy\PolicyService;
 use TYPO3\Flow\Security\Policy\Role;
+use TYPO3\Neos\Domain\Repository\SiteRepository;
 use TYPO3\Neos\Security\Authorization\Privilege\NodeTreePrivilege;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
+use TYPO3\TYPO3CR\Domain\Model\NodeLabelGeneratorInterface;
 use TYPO3\TYPO3CR\Domain\Service\ContextFactoryInterface;
 use TYPO3\TYPO3CR\Security\Authorization\Privilege\Node\CreateNodePrivilege;
 use TYPO3\TYPO3CR\Security\Authorization\Privilege\Node\CreateNodePrivilegeSubject;
@@ -40,23 +42,24 @@ class ACLCheckerService
     protected $policyService;
 
     /**
+     * @Flow\Inject
+     * @var SiteRepository
+     */
+    protected $siteRepository;
+
+    /**
+     * @Flow\Inject
+     * @var  NodeLabelGeneratorInterface
+     */
+    protected $nodeLabelGenerator;
+
+    /**
      * @param ACLCheckerDto $dto
      * @return array
      */
     public function resolveDto(ACLCheckerDto $dto)
     {
-        $checkedNodes = [];
-
-        $nodes = $this->getNodes($dto);
-        $roles = $this->getRolesByDto($dto);
-
-        foreach ($nodes as $node) {
-            if ($node instanceof NodeInterface) {
-                $checkedNodes[] = $this->checkNodeForRoles($node, $roles);
-            }
-        }
-
-        return $checkedNodes;
+        return $this->getNodes($dto);
     }
 
     /**
@@ -65,24 +68,17 @@ class ACLCheckerService
      */
     public function checkNodeForRoles(NodeInterface $node, array $roles)
     {
-        $checkedNodes = [
-            'node' => [
-                'nodeData' => $node,
-                'title' => $node->getProperty('title')
-            ],
-            'acl' => []
-        ];
+        $checkedNodes = [];
 
         foreach ($roles as $role) {
             /** @var Role $role */
-            $checkedNodes['acl'][$role->getIdentifier()] = [
+            $checkedNodes[$role->getIdentifier()] = [
                 'editNode' => $this->privilegeManager->isGrantedForRoles([$role], EditNodePrivilege::class, new NodePrivilegeSubject($node), $debug),
                 'removeNode' => $this->privilegeManager->isGrantedForRoles([$role], RemoveNodePrivilege::class, new NodePrivilegeSubject($node)),
                 'createNodeOfType' => $this->privilegeManager->isGrantedForRoles([$role], CreateNodePrivilege::class, new CreateNodePrivilegeSubject($node)),
                 'showInTree' => $this->privilegeManager->isGrantedForRoles([$role], NodeTreePrivilege::class, new NodePrivilegeSubject($node))
             ];
         }
-
         return $checkedNodes;
     }
 
@@ -92,21 +88,15 @@ class ACLCheckerService
      */
     protected function getNodes(ACLCheckerDto $dto)
     {
-        if (empty($dto->getStartOnNodePath())) {
-            return [];
-        }
-
         $context = $this->contextFactory->create(array('workspaceName' => 'live'));
 
-        if($dto->getStopOnNodePath() !== '') {
-            try {
-                $nodes = $context->getNodesOnPath($dto->getStartOnNodePath(), $dto->getStopOnNodePath());
-            } catch (\InvalidArgumentException $e) {
-                $nodes = [];
-            }
-        } else {
-            $nodes = [$context->getNode($dto->getStartOnNodePath())];
-        }
+        $site = $this->siteRepository->findFirstOnline();
+        $startNode = $context->getNode('/sites/' . $site->getNodeName());
+
+        $roles = $this->getRolesByDto($dto);
+
+        $nodes = [];
+        $this->getChildNodeData($nodes, $startNode, $roles, $dto->getNodeTreeLoadingDepth());
 
         return $nodes;
     }
@@ -127,4 +117,34 @@ class ACLCheckerService
         return $roles;
     }
 
+    /**
+     * @param array $nodes
+     * @param NodeInterface $node
+     * @param array $roles
+     * @param int $depth
+     * @param int $recursionPointer
+     * @param string $nodeTypeFilter
+     */
+    protected function getChildNodeData(array &$nodes, $node, $roles, $depth = 0, $recursionPointer = 1, $nodeTypeFilter = 'TYPO3.Neos:Document')
+    {
+        foreach ($node->getChildNodes($nodeTypeFilter) as $childNode) {
+            /** @var NodeInterface $childNode */
+            $expand = ($depth === 0 || $recursionPointer < $depth);
+
+            $properties = [
+                'nodePath' => $childNode->getPath(),
+                'nodeLabel' => $childNode->getLabel(),
+                'nodeType' => $childNode->getNodeType()->getName(),
+                'nodeLevel' => $childNode->getDepth(),
+                'acl' => $this->checkNodeForRoles($childNode, $roles)
+            ];
+
+            if($expand && $childNode->hasChildNodes($nodeTypeFilter)) {
+                $properties['childNodes'] = [];
+                $this->getChildNodeData($properties['childNodes'], $childNode, $roles, $depth, ($recursionPointer + 1), $nodeTypeFilter);
+            }
+
+            array_push($nodes, $properties);
+        }
+    }
 }

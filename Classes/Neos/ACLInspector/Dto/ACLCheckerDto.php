@@ -1,6 +1,7 @@
 <?php
 namespace Neos\ACLInspector\Dto;
 
+use TYPO3\Flow\Annotations as Flow;
 
 class ACLCheckerDto
 {
@@ -16,9 +17,15 @@ class ACLCheckerDto
     protected $stopOnNodePath;
 
     /**
+     * @var integer
+     * @Flow\InjectConfiguration(path="userInterface.navigateComponent.nodeTree.loadingDepth", package="TYPO3.Neos")
+     */
+    protected $nodeTreeLoadingDepth;
+
+    /**
      * @var array
      */
-    protected $roles = [];
+    protected $roles = ['TYPO3.Neos:Editor', 'TYPO3.Neos:Administrator'];
 
     /**
      * @return array
@@ -66,6 +73,22 @@ class ACLCheckerDto
     public function setStopOnNodePath($stopOnNodePath)
     {
         $this->stopOnNodePath = $stopOnNodePath;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNodeTreeLoadingDepth()
+    {
+        return $this->nodeTreeLoadingDepth;
+    }
+
+    /**
+     * @param int $nodeTreeLoadingDepth
+     */
+    public function setNodeTreeLoadingDepth($nodeTreeLoadingDepth)
+    {
+        $this->nodeTreeLoadingDepth = $nodeTreeLoadingDepth;
     }
 
 

@@ -5,6 +5,10 @@
     .acl-dropdown {border: none; padding: 0 14px !important; border-top: 2px solid #595959; background-color: #3f3f3f;}
     .acl-dropdown span { display: block; height: 40px; line-height: 36px; }
     .acl-dropdown span span{ display: inline; color: #9C9C9C; }
+
+    .acl-nodelevel-4 span { padding-left: 20px;}
+    .acl-nodelevel-5 span { padding-left: 40px;}
+    .acl-nodelevel-6 span { padding-left: 60px;}
 </style>
 
 <div class="neos-content neos-container-fluid">
@@ -12,6 +16,16 @@
         <div class="neos-row-fluid">
             <fieldset class="neos-span6">
                 <legend>Show nodes</legend>
+
+                <div class="neos-control-group">
+                    <label class="neos-control-label" for="startPath">Show x level:</label>
+                    <div class="neos-controls neos-controls-row">
+                        <f:form.select property="nodeTreeLoadingDepth" options="{0: 0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 999:'All'}" />
+                    </div>
+                </div>
+
+                <f:comment>
+                THIS IS NOT USED RIGHT NOW
                 <div class="neos-control-group">
                     <label class="neos-control-label" for="startPath">Start on path:</label>
                     <div class="neos-controls neos-controls-row">
@@ -28,7 +42,9 @@
                         <div class="acl-dropdown" style="display: none">adsfsdf</div>
                     </div>
                 </div>
-                <button class="neos-button neos-button-success neos-pull-right">Check ACL</button>
+                </f:comment>
+
+                <button class="neos-button neos-button-success neos-pull-left">Check ACL</button>
             </fieldset>
             <fieldset class="neos-span6">
                 <legend>Check for Roles</legend>
@@ -53,8 +69,8 @@
     <table class="neos-table">
         <thead>
         <tr>
-            <th>Path</th>
             <th>Title</th>
+            <th>Path</th>
             <th>Nodetype</th>
             <th>
                 <i class="icon-nodeCheck icon-white icon-plus"></i>
@@ -64,25 +80,8 @@
         </tr>
         </thead>
         <tbody>
-
-        <f:for each="{nodes}" as="checkedNode">
-            <tr>
-                <td><span>{checkedNode.node.nodeData.path}</span></td>
-                <td><span class="neos-label">{checkedNode.node.title}</span></td>
-                <td><span class="neos-label">{checkedNode.node.nodeData.nodeType}</span></td>
-                <td colspan="4">
-                    <f:for each="{checkedNode.acl}" as="checks" key="roleIdentifier">
-                        <f:render section="icon" arguments="{value: checks.createNodeOfType}"/>
-                        <f:render section="icon" arguments="{value: checks.editNode}"/>
-                        <f:render section="icon" arguments="{value: checks.removeNode}"/>
-                        <f:render section="icon" arguments="{value: checks.showInTree}"/>
-
-                        <span class="neos-label">{roleIdentifier}</span>
-                        <br/>
-                    </f:for>
-                </td>
-
-            </tr>
+        <f:for each="{nodes}" as="rootNode">
+            <f:render section="nodeRow" arguments="{node:rootNode}" />
         </f:for>
 
         <f:if condition="{nodes -> f:count()} == 0">
@@ -92,6 +91,32 @@
     </table>
 
 </div>
+
+<f:section name="nodeRow">
+    <tr>
+        <td class="acl-nodelevel-{node.nodeLevel}"><span>{node.nodeLabel}</span></td>
+        <td><span>{node.nodePath}</span></td>
+        <td><span class="neos-label">{node.nodeType}</span></td>
+        <td colspan="4">
+            <f:for each="{node.acl}" as="checks" key="roleIdentifier">
+                <f:render section="icon" arguments="{value: checks.createNodeOfType}"/>
+                <f:render section="icon" arguments="{value: checks.editNode}"/>
+                <f:render section="icon" arguments="{value: checks.removeNode}"/>
+                <f:render section="icon" arguments="{value: checks.showInTree}"/>
+
+                <span class="neos-label">{roleIdentifier}</span>
+                <br/>
+            </f:for>
+        </td>
+    </tr>
+
+    <f:if condition="{node.childNodes -> f:count()} > 0">
+        <f:for each="{node.childNodes}" as="childNode">
+            <f:render section="nodeRow" arguments="{node:childNode}" />
+        </f:for>
+    </f:if>
+
+</f:section>
 
 <f:section name="icon">
     <f:if condition="{value}">
@@ -103,6 +128,8 @@
         </f:else>
     </f:if>
 </f:section>
+
+
 
 
 <script>

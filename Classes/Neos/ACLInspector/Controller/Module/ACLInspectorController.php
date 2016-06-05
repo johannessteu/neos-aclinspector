@@ -31,11 +31,11 @@ class ACLInspectorController extends AbstractModuleController
      */
     public function indexAction(ACLCheckerDto $dto = null)
     {
-        if ($dto !== null) {
-            $nodes = $this->aclCheckService->resolveDto($dto);
-        } else {
-            $nodes = [];
+        if($dto === null) {
+            $dto = new ACLCheckerDto();
         }
+
+        $nodes = $this->aclCheckService->resolveDto($dto);
 
         $this->view->assignMultiple(
             [
