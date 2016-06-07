@@ -132,6 +132,7 @@ class ACLCheckerService
             $expand = ($depth === 0 || $recursionPointer < $depth);
 
             $properties = [
+                'nodeIdentifier' => $childNode->getIdentifier(),
                 'nodePath' => $childNode->getPath(),
                 'nodeLabel' => $childNode->getLabel(),
                 'nodeType' => $childNode->getNodeType()->getName(),

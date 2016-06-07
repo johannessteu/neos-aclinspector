@@ -70,7 +70,7 @@
         <thead>
         <tr>
             <th>Title</th>
-            <th>Path</th>
+            <th>Identifier</th>
             <th>Nodetype</th>
             <th>
                 <i class="icon-nodeCheck icon-white icon-plus"></i>
@@ -95,7 +95,7 @@
 <f:section name="nodeRow">
     <tr>
         <td class="acl-nodelevel-{node.nodeLevel}"><span>{node.nodeLabel}</span></td>
-        <td><span>{node.nodePath}</span></td>
+        <td><span>{node.nodeIdentifier}</span></td>
         <td><span class="neos-label">{node.nodeType}</span></td>
         <td colspan="4">
             <f:for each="{node.acl}" as="checks" key="roleIdentifier">
