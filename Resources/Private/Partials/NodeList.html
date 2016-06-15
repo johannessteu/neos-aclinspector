@@ -1,0 +1,97 @@
+<legend>Access Control List</legend>
+<div class="neos-content neos-container-fluid">
+
+    <table class="neos-table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Identifier</th>
+            <th>Nodetype</th>
+            <th>
+                <i class="icon-nodeCheck icon-white icon-plus"></i>
+                <i class="icon-nodeCheck icon-white icon-pencil"></i>
+                <i class="icon-nodeCheck icon-white icon-times"></i>
+                <i class="icon-nodeCheck icon-white icon-sitemap"></i>
+            </th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <f:for each="{nodes}" as="rootNode">
+            <f:render section="nodeRow" arguments="{node:rootNode}" />
+        </f:for>
+
+        <f:if condition="{nodes -> f:count()} == 0">
+            <tr><td colspan="4">No nodes found</td>
+        </f:if>
+        </tbody>
+    </table>
+
+</div>
+
+<f:section name="nodeRow">
+    <tr>
+        <td class="acl-nodelevel-{node.nodeLevel}"><span>{node.nodeLabel}</span></td>
+        <td><span>{node.nodeIdentifier}</span></td>
+        <td><span class="neos-label">{node.nodeType}</span></td>
+        <td>
+            <f:if condition="{node.acl -> f:count()} > 3">
+                <f:then>
+                    <div class="acl-data" style="display: none">
+                        <f:for each="{node.acl}" as="checks" key="roleIdentifier">
+                            <f:render section="checks" arguments="{checks:checks, roleIdentifier:roleIdentifier}" />
+                        </f:for>
+                    </div>
+                    <button class="neos-button neos-button-success acl-toggle">Show all</button>
+                </f:then>
+                <f:else>
+                    <f:for each="{node.acl}" as="checks" key="roleIdentifier">
+                        <f:render section="checks" arguments="{checks:checks, roleIdentifier:roleIdentifier}" />
+                    </f:for>
+                </f:else>
+            </f:if>
+        </td>
+        <td>
+            <f:link.action action="show" class="neos-button neos-button-success" arguments="{node: '{node.nodePath}'}">
+                <i class="icon-white icon-eye-open"></i>
+            </f:link.action>
+        </td>
+    </tr>
+
+    <f:if condition="{node.childNodes -> f:count()} > 0">
+        <f:for each="{node.childNodes}" as="childNode">
+            <f:render section="nodeRow" arguments="{node:childNode}" />
+        </f:for>
+    </f:if>
+</f:section>
+
+<f:section name="icon">
+    <f:if condition="{value}">
+        <f:then>
+            <i class="icon-nodeCheck icon-green icon-check"></i>
+        </f:then>
+        <f:else>
+            <i class="icon-nodeCheck icon-red icon-times"></i>
+        </f:else>
+    </f:if>
+</f:section>
+
+<f:section name="checks">
+    <f:render section="icon" arguments="{value: checks.createNodeOfType}"/>
+    <f:render section="icon" arguments="{value: checks.editNode}"/>
+    <f:render section="icon" arguments="{value: checks.removeNode}"/>
+    <f:render section="icon" arguments="{value: checks.showInTree}"/>
+
+    <span class="neos-label">{roleIdentifier}</span>
+    <br/>
+</f:section>
+
+
+<script>
+    (function($) {
+        $('.acl-toggle').click(function() {
+            $(this).html('Show all');
+            $(this).parent().find('.acl-data').toggle();
+        });
+    })(jQuery);
+</script>

@@ -1,0 +1,107 @@
+<style>
+    .icon-green { color: green; }
+    .icon-red { color: red; }
+    .icon-nodeCheck { margin: 0 10px !important; }
+    .acl-dropdown {border: none; padding: 0 14px !important; border-top: 2px solid #595959; background-color: #3f3f3f;}
+    .acl-dropdown span { display: block; height: 40px; line-height: 36px; }
+    .acl-dropdown span span{ display: inline; color: #9C9C9C; }
+
+    .acl-nodelevel-4 span { padding-left: 20px;}
+    .acl-nodelevel-5 span { padding-left: 40px;}
+    .acl-nodelevel-6 span { padding-left: 60px;}
+    .acl-nodelevel-7 span { padding-left: 80px;}
+    .acl-nodelevel-8 span { padding-left: 90px;}
+    .acl-nodelevel-9 span { padding-left: 100px;}
+    .acl-nodelevel-10 span { padding-left: 110px;}
+</style>
+
+<f:for each="{breadcrumbNodes}" as="parentNode" iteration="cnt">
+    <f:link.action action="show" arguments="{node: parentNode}"><span class="neos-label">{parentNode.label}</span></f:link.action>
+    <f:if condition="{cnt.isLast}">
+        <f:else> / </f:else>
+    </f:if>
+</f:for>
+
+
+<div class="neos-content neos-container-fluid">
+    <div class="neos-row-fluid">
+        <div class="neos-span8">
+            <legend>Privilege Targets</legend>
+            <table class="neos-table">
+                <tr class="neos-folder" id="denied">
+                    <td colspan="3" class="neos-check-denied">
+                        <strong><em class="icon-nodeCheck icon-red icon-times"></em> Denied Targets ({targets.denied -> f:count()})</strong>
+                    </td>
+                    <td class="neos-priority1 neos-aRight">
+                        <i class="fold-toggle icon-white icon-chevron-down" data-toggle="fold-denied"></i>
+                    </td>
+                </tr>
+                <f:for each="{targets.denied}" as="row">
+                    <tr class="fold-denied" title="" style="display: none;">
+                        <td colspan="2">
+                            {row.privilege}
+                        </td>
+                        <td colspan="2">
+                            {row.role}
+                        </td>
+                    </tr>
+                </f:for>
+
+                <tr class="neos-folder" id="abstained">
+                    <td colspan="3" class="neos-check-abstained">
+                        <strong><em class="icon-nodeCheck icon-white icon-question"></em> Abstained Targets ({targets.abstained -> f:count()})</strong>
+                    </td>
+                    <td class="neos-priority1 neos-aRight">
+                        <i class="fold-toggle icon-white icon-chevron-down" data-toggle="fold-abstained"></i>
+                    </td>
+                </tr>
+                <f:for each="{targets.abstained}" as="row">
+                    <tr class="fold-abstained" title="" style="display: none;">
+                        <td colspan="2">
+                            {row.privilege}
+                        </td>
+                        <td colspan="2">
+                            {row.role}
+                        </td>
+                    </tr>
+                </f:for>
+
+                <tr class="neos-folder" id="granted">
+                    <td colspan="3" class="neos-check-granted">
+                        <strong><em class="icon-nodeCheck icon-green icon-check"></em> Granted Targets ({targets.granted -> f:count()})</strong>
+                    </td>
+                    <td class="neos-aRight">
+                        <i class="fold-toggle icon-white icon-chevron-down" data-toggle="fold-granted"></i>
+                    </td>
+                </tr>
+                <f:for each="{targets.granted}" as="row">
+                    <tr class="fold-granted" title="" style="display: none;">
+                        <td colspan="2">
+                            {row.privilege}
+                        </td>
+                        <td colspan="2">
+                            {row.role}
+                        </td>
+                    </tr>
+                </f:for>
+
+             </table>
+        </div>
+
+        <div class="neos-span4">
+            <f:render partial="Detail/Info" arguments="{node:node}"/>
+        </div>
+    </div>
+</div>
+
+<f:render partial="NodeList" arguments="{nodes:childNodes}" />
+
+
+<script>
+    (function($) {
+        $('.fold-toggle').click(function() {
+            $(this).toggleClass('icon-chevron-down icon-chevron-down');
+            $('tr.' + $(this).data('toggle')).toggle();
+        });
+    })(jQuery);
+</script>
