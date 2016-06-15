@@ -3,7 +3,7 @@
 This is a pretty rough first prototype of an acl inspector implementation made for Neos CMS http://www.neos.io
 
 
-![ACL Inspector](http://g.recordit.co/M4Te0TAb6X.gif)
+![ACL Inspector](http://g.recordit.co/MoMLCSufvP.gif)
 
 ### Installation
 To get this module installed require it via composer:
